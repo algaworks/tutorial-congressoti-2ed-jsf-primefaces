@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui">
+<h:head>
+  <meta charset="UTF-8"/>
+  <title>Sistema de Portaria</title>
+  
+  <h:outputStylesheet library="algaworks" name="estilo.css" />
+</h:head>
+
+<h:body>
+
+<f:metadata>
+	<f:viewAction action="#{registroVisitanteBean.consultar}" />
+</f:metadata>
+
+<h:form id="frm">
+
+	<p:growl id="msgs-geral" />
+
+	<header>
+		<h:graphicImage library="algaworks" name="logo.png" />
+	</header>
+	
+	<div id="conteudo">
+		<div style="text-align: center; margin-bottom: 15px">
+			<p:commandButton value="Novo visitante" 
+				action="#{registroVisitanteBean.novo}"
+				update="painel-dialogo" process="@this"
+				onsuccess="PF('novoVisitanteDialog').show(); return false;">
+				<p:resetInput target="novo-visitante-dialog" />
+			</p:commandButton>
+		</div>
+			
+		<p:dataGrid value="#{registroVisitanteBean.todosVisitantes}" var="visitante"
+			columns="3" layout="grid" id="grid-visitantes">
+			<p:panel header="#{visitante.nome}" style="text-align: center">
+				<h:graphicImage value="/foto-visitante?visitante=#{visitante.id}"/>
+				<h:outputText value="#{visitante.dataVisita}">
+					<f:convertDateTime pattern="HH:mm:ss" timeZone="America/Sao_Paulo" />
+				</h:outputText>
+			</p:panel>
+		</p:dataGrid>
+	</div>
+	
+	<p:dialog widgetVar="novoVisitanteDialog" header="Novo visitante"
+		resizable="false" modal="true" dynamic="true" id="novo-visitante-dialog">
+		
+		<h:panelGroup id="painel-dialogo">
+			<p:messages id="msgs-dialogo" />
+			
+			<h:panelGrid columns="2">
+				<h:panelGroup style="text-align: center" layout="block" id="painel-foto">
+					<p:photoCam widgetVar="camera" width="300" format="jpeg"
+						listener="#{fotoCameraBean.aoCapturarFoto}"
+						update="painel-foto botao-registrar"
+						rendered="#{not fotoCameraBean.fotoCapturada}" />
+					<p:commandLink value="Capturar foto!"
+						onclick="PF('camera').capture(); return false;"
+						rendered="#{not fotoCameraBean.fotoCapturada}" />
+					
+					<p:graphicImage value="#{fotoCameraBean.fotoContent}"
+						cache="false" rendered="#{fotoCameraBean.fotoCapturada}" />
+				</h:panelGroup>
+			
+				<h:panelGrid columns="1" style="margin-left: 10px">
+					<p:outputLabel value="Nome" for="nome" />
+					<p:inputText size="30" id="nome" value="#{registroVisitanteBean.visitante.nome}" />
+					
+					<p:outputLabel value="CPF" for="cpf" />
+					<p:inputMask size="14" mask="999.999.999-99" id="cpf" 
+						value="#{registroVisitanteBean.visitante.cpf}" />
+					
+					<p:outputLabel value="Telefone" for="telefone" />
+					<p:inputText size="20" id="telefone" 
+						value="#{registroVisitanteBean.visitante.telefone}" />
+					
+					<p:commandButton value="Registrar" icon="fa fa-save"
+						id="botao-registrar"
+						update="painel-dialogo grid-visitantes"
+						action="#{registroVisitanteBean.adicionar}"
+						disabled="#{not fotoCameraBean.fotoCapturada}" />
+				</h:panelGrid>
+			</h:panelGrid>
+		</h:panelGroup>
+		
+	</p:dialog>
+
+</h:form>
+
+</h:body>
+
+</html>
